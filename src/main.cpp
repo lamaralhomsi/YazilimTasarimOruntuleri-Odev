@@ -1,40 +1,70 @@
 #include <iostream>
 
-// Bildirim tiplerini belirlemek icin enum
+// Bildirim tipleri
 enum NotificationType { EMAIL, SMS, PUSH };
 
-// Bu sinif her seyi tek basina yapiyor (God Class). 
-// Bu cok kotu bir tasarim ornegidir.
-class NotificationManager {
+// Soyut Urun (Abstract Product) sinifi (Arayuz gorevi gorur)
+class Notification {
 public:
-    // Bildirim gonderme fonksiyonu
-    void gonder(NotificationType tip, const char* mesaj, const char* alici) {
-        
-        // Hangi tip oldugunu surekli if-else ile kontrol ediyoruz.
-        // Yeni bir tip (orn: WhatsApp) eklemek istersek bu kodu degistirmemiz gerekecek.
-        // Bu durum "Open/Closed" prensibine aykiridir.
-        
-        if (tip == EMAIL) {
-            std::cout << "Email gonderiliyor... Alici: " << alici << std::endl;
-            std::cout << "Mesaj: " << mesaj << std::endl;
-        } 
-        else if (tip == SMS) {
-            std::cout << "SMS gonderiliyor... No: " << alici << std::endl;
-            std::cout << "Mesaj: " << mesaj << std::endl;
-        } 
-        else if (tip == PUSH) {
-            std::cout << "Push bildirimi gonderiliyor... Cihaz ID: " << alici << std::endl;
-            std::cout << "Mesaj: " << mesaj << std::endl;
+    virtual ~Notification() {}
+    // Saf sanal fonksiyon, turetilmis siniflar bunu doldurmak zorunda
+    virtual void send(const char* message, const char* recipient) = 0;
+};
+
+// Somut Urunler (Concrete Products)
+class EmailNotification : public Notification {
+public:
+    void send(const char* message, const char* recipient) override {
+        std::cout << "Email gonderiliyor -> Alici: " << recipient << " | Mesaj: " << message << std::endl;
+    }
+};
+
+class SMSNotification : public Notification {
+public:
+    void send(const char* message, const char* recipient) override {
+        std::cout << "SMS gonderiliyor -> No: " << recipient << " | Mesaj: " << message << std::endl;
+    }
+};
+
+class PushNotification : public Notification {
+public:
+    void send(const char* message, const char* recipient) override {
+        std::cout << "Push gonderiliyor -> Cihaz: " << recipient << " | Mesaj: " << message << std::endl;
+    }
+};
+
+// Fabrika (Factory) Sinifi - Nesne Yaratma Sorumlulugu Sadece Burada!
+class NotificationFactory {
+public:
+    // Cok bicimlilik (polymorphism) kullanarak pointer donduruyoruz
+    static Notification* createNotification(NotificationType type) {
+        if (type == EMAIL) {
+            return new EmailNotification();
+        } else if (type == SMS) {
+            return new SMSNotification();
+        } else if (type == PUSH) {
+            return new PushNotification();
         }
+        return nullptr;
     }
 };
 
 int main() {
-    NotificationManager manager;
+    // ARTIK GOD CLASS YOK! Nesneleri dogrudan uretmiyoruz, Fabrikadan istiyoruz.
+    
+    // Email nesnesi uretimi
+    Notification* emailNotif = NotificationFactory::createNotification(EMAIL);
+    if (emailNotif != nullptr) {
+        emailNotif->send("Faz 1 - Factory Method tamamlandi!", "lamar@example.com");
+        delete emailNotif; // Pointer kullandigimiz icin bellegi manuel temizliyoruz
+    }
 
-    // Kotu tasarim: Her defasinda tipi manuel seciyoruz
-    manager.gonder(EMAIL, "Vize projesine basladik!", "lamar@example.com");
-    manager.gonder(SMS, "Kodlar hazir.", "05551234567");
+    // SMS nesnesi uretimi
+    Notification* smsNotif = NotificationFactory::createNotification(SMS);
+    if (smsNotif != nullptr) {
+        smsNotif->send("Kodlar cok daha esnek hale geldi.", "05551234567");
+        delete smsNotif;
+    }
 
     return 0;
 }
