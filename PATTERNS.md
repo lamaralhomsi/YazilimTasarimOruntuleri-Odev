@@ -14,3 +14,11 @@ Neden Kullanıldı: Bildirimleri alacak kullanıcıların listesini dinamik olar
 
 Ne Kazandık: Yayıncı sınıf, abonelerin kim olduğunu bilmek zorunda kalmaz, sadece IObserver arayüzüne bildirim gönderir. Bu da Gevşek Bağlılık (Loose Coupling) sağlar.
 
+Faz 3: Structural Pattern - Decorator Method
+
+Nerede Kullanıldı: ObserverDecorator ve PriorityDecorator sınıflarında kullanıldı.
+
+Neden Kullanıldı: Bildirim sistemindeki nesnelere (kullanıcılara) kalıtım (inheritance) kullanmadan, çalışma zamanında dinamik olarak yeni özellikler (öncelik etiketi) eklemek için.
+
+Ne Kazandık: User sınıfının orijinal yapısını hiç değiştirmeden, istenen kullanıcılara ekstra davranışlar eklenebildi. Bu da Single Responsibility (Tek Sorumluluk) prensibini güçlendirdi.
+
