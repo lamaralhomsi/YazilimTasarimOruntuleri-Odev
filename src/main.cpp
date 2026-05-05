@@ -1,70 +1,103 @@
 #include <iostream>
 
-// Bildirim tipleri
-enum NotificationType { EMAIL, SMS, PUSH };
-
-// Soyut Urun (Abstract Product) sinifi (Arayuz gorevi gorur)
-class Notification {
+// Arayuz: Gozlemci (Observer)
+class IObserver {
 public:
-    virtual ~Notification() {}
-    // Saf sanal fonksiyon, turetilmis siniflar bunu doldurmak zorunda
-    virtual void send(const char* message, const char* recipient) = 0;
+    virtual ~IObserver() {}
+    virtual void update(const char* message) = 0;
 };
 
-// Somut Urunler (Concrete Products)
-class EmailNotification : public Notification {
+// Somut Gozlemci: Kullanici (User)
+class User : public IObserver {
+private:
+    const char* name;
 public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "Email gonderiliyor -> Alici: " << recipient << " | Mesaj: " << message << std::endl;
+    User(const char* userName) : name(userName) {}
+    void update(const char* message) override {
+        std::cout << "Kullanici " << name << " yeni bildirim aldi: " << message << std::endl;
     }
 };
 
-class SMSNotification : public Notification {
+// Yayinci (Subject) - Bildirim Merkezi
+class NotificationSystem {
+private:
+    IObserver** observers; // Pointer to pointer (Dizi yerine)
+    int capacity;
+    int count;
 public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "SMS gonderiliyor -> No: " << recipient << " | Mesaj: " << message << std::endl;
-    }
-};
-
-class PushNotification : public Notification {
-public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "Push gonderiliyor -> Cihaz: " << recipient << " | Mesaj: " << message << std::endl;
-    }
-};
-
-// Fabrika (Factory) Sinifi - Nesne Yaratma Sorumlulugu Sadece Burada!
-class NotificationFactory {
-public:
-    // Cok bicimlilik (polymorphism) kullanarak pointer donduruyoruz
-    static Notification* createNotification(NotificationType type) {
-        if (type == EMAIL) {
-            return new EmailNotification();
-        } else if (type == SMS) {
-            return new SMSNotification();
-        } else if (type == PUSH) {
-            return new PushNotification();
+    NotificationSystem(int cap) : capacity(cap), count(0) {
+        observers = new IObserver*[capacity];
+        
+        // Pointer aritmetigi ile baslangic atamasi
+        for (int i = 0; i < capacity; ++i) {
+            *(observers + i) = nullptr;
         }
-        return nullptr;
+    }
+    
+    ~NotificationSystem() {
+        delete[] observers;
+    }
+
+    void attach(IObserver* observer) {
+        if (count < capacity) {
+            // Indeks yerine pointer aritmetigi kullanildi
+            *(observers + count) = observer;
+            count++;
+        } else {
+            std::cout << "Kapasite dolu, yeni gozlemci eklenemez." << std::endl;
+        }
+    }
+
+    void detach(IObserver* observer) {
+        for (int i = 0; i < count; ++i) {
+            if (*(observers + i) == observer) {
+                // Sola kaydirma islemi (Pointer aritmetigi ile)
+                for (int j = i; j < count - 1; ++j) {
+                    *(observers + j) = *(observers + j + 1);
+                }
+                *(observers + count - 1) = nullptr;
+                count--;
+                break;
+            }
+        }
+    }
+
+    void notifyAll(const char* message) {
+        // Tum abonelere bildirimi ilet (Pointer aritmetigi ile)
+        for (int i = 0; i < count; ++i) {
+            if (*(observers + i) != nullptr) {
+                (*(observers + i))->update(message);
+            }
+        }
     }
 };
 
 int main() {
-    // ARTIK GOD CLASS YOK! Nesneleri dogrudan uretmiyoruz, Fabrikadan istiyoruz.
+    // Faz 2: Observer Pattern Testi
     
-    // Email nesnesi uretimi
-    Notification* emailNotif = NotificationFactory::createNotification(EMAIL);
-    if (emailNotif != nullptr) {
-        emailNotif->send("Faz 1 - Factory Method tamamlandi!", "lamar@example.com");
-        delete emailNotif; // Pointer kullandigimiz icin bellegi manuel temizliyoruz
-    }
-
-    // SMS nesnesi uretimi
-    Notification* smsNotif = NotificationFactory::createNotification(SMS);
-    if (smsNotif != nullptr) {
-        smsNotif->send("Kodlar cok daha esnek hale geldi.", "05551234567");
-        delete smsNotif;
-    }
-
+    NotificationSystem* subject = new NotificationSystem(5);
+    
+    User* user1 = new User("Ali");
+    User* user2 = new User("Ayse");
+    User* user3 = new User("Mehmet");
+    
+    subject->attach(user1);
+    subject->attach(user2);
+    
+    std::cout << "--- Ilk Bildirim Gonderiliyor ---" << std::endl;
+    subject->notifyAll("Sistem guncellemesi basliyor!");
+    
+    std::cout << "\n--- Mehmet Sisteme Katiliyor, Ayse Ayriliyor ---" << std::endl;
+    subject->attach(user3);
+    subject->detach(user2);
+    
+    subject->notifyAll("Yeni yari yil basladi!");
+    
+    // Bellek temizligi
+    delete subject;
+    delete user1;
+    delete user2;
+    delete user3;
+    
     return 0;
 }
