@@ -15,7 +15,7 @@ Versiyon Kontrol: Git & GitHub 📂
 
 CI/CD: GitHub Actions ⚙️
 
-AI Desteği: Claude & ChatGPT 🤖
+AI Desteği: Claude & Gemini 🤖
 
 📂 Proje Yapısı
 src/ -> Kaynak kodlar 📄
