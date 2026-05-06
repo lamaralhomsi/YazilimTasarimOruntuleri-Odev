@@ -6,3 +6,7 @@ AI'ın Yanıtı (Özet): AI, nesne üretiminin tek bir sınıfa yığılmasını
 
 Benim Uygulamam: AI'ın Factory Method önerisini kabul ettim ve projeme uyguladım. Üniversite kurallarım gereği string.h kütüphanelerinden kaçınarak işlemleri const char\* pointer'ları üzerinden gerçekleştirdim ve bellek sızıntılarını önlemek için pointer nesnelerini işim bitince sildim.
 
+**AI Yansıma Soruları:**
+* **AI olmasaydı bu faz ne kadar sürerdi?** Pointer kısıtlamaları ve bellek yönetimi nedeniyle yaklaşık 1-2 saat daha fazla sürerdi.
+* **AI sizi nerede yanılttı?** Başlangıçta standart kütüphane (string.h) kullanımını önerdi, ancak laboratuvar kısıtlamalarını hatırlatınca pointer aritmetiğine döndü.
+
