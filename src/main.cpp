@@ -1,66 +1,116 @@
 #include <iostream>
 
-// Temel Arayuz (Component)
+// --- FAZ 3: BEHAVIORAL (Davranissal) ORUNTULER ---
+
+// 1. STRATEGY PATTERN (Yeni Eklendi)
+class IFormatStrategy {
+public:
+    virtual ~IFormatStrategy() {}
+    virtual void format(const char* msg) = 0;
+};
+
+class StandardFormat : public IFormatStrategy {
+public:
+    void format(const char* msg) override {
+        std::cout << "[Sistem Mesaji]: " << msg << std::endl;
+    }
+};
+
+// 2. OBSERVER PATTERN (Zaten Vardi)
 class IObserver {
 public:
     virtual ~IObserver() {}
     virtual void update(const char* message) = 0;
 };
 
-// Somut Bilesen (Concrete Component)
 class User : public IObserver {
 private:
     const char* name;
 public:
     User(const char* userName) : name(userName) {}
     void update(const char* message) override {
-        std::cout << "Kullanici " << name << " mesaji aldi: " << message << std::endl;
+        std::cout << "Kullanici " << name << " bildirimi aldi." << std::endl;
     }
 };
 
-// Dekorator (Decorator) Temel Sinifi
+
+// --- FAZ 2: STRUCTURAL (Yapisal) ORUNTULER ---
+
+// 1. DECORATOR PATTERN (Zaten Vardi)
 class ObserverDecorator : public IObserver {
 protected:
-    IObserver* wrappedObserver; // Sarmalanan asil nesne (Pointer)
+    IObserver* wrapped;
 public:
-    ObserverDecorator(IObserver* observer) : wrappedObserver(observer) {}
-    virtual ~ObserverDecorator() {}
-    virtual void update(const char* message) override {
-        if (wrappedObserver != nullptr) {
-            wrappedObserver->update(message);
-        }
+    ObserverDecorator(IObserver* obs) : wrapped(obs) {}
+    virtual void update(const char* msg) override {
+        if(wrapped) wrapped->update(msg);
     }
 };
 
-// Somut Dekorator: Oncelik Etiketi Ekleyen Sinif
 class PriorityDecorator : public ObserverDecorator {
 public:
-    PriorityDecorator(IObserver* observer) : ObserverDecorator(observer) {}
-    void update(const char* message) override {
-        // Asil mesajdan once ekstra davranis (ozellik) ekliyoruz
-        std::cout << "[ACIL ONCELIKLI] ";
-        ObserverDecorator::update(message);
+    PriorityDecorator(IObserver* obs) : ObserverDecorator(obs) {}
+    void update(const char* msg) override {
+        std::cout << "[ACIL ONCELIK] ";
+        ObserverDecorator::update(msg);
     }
 };
 
+// 2. FACADE PATTERN (Yeni Eklendi)
+class NotificationFacade {
+private:
+    IFormatStrategy* formatter;
+public:
+    NotificationFacade(IFormatStrategy* strat) : formatter(strat) {}
+    void sendNotification(IObserver* user, const char* msg) {
+        // Facade karmasikligi gizler: Once formata sokar, sonra gonderir.
+        formatter->format(msg);
+        user->update(msg);
+    }
+};
+
+
+// --- FAZ 1: CREATIONAL (Yaratimsal) ORUNTULER ---
+
+// 1. FACTORY METHOD (Zaten Vardi)
+class UserFactory {
+public:
+    static IObserver* createUser(const char* name, bool isPriority) {
+        IObserver* baseUser = new User(name);
+        if (isPriority) {
+            // Eger oncelikliyse Decorator ile sarmalayip uretir
+            return new PriorityDecorator(baseUser);
+        }
+        return baseUser;
+    }
+};
+
+
 int main() {
-    // Faz 3: Decorator Pattern Testi
+    std::cout << "--- Sistem Testi Basliyor ---" << std::endl;
+
+    // Faz 1: Factory ile nesneler uretilir
+    IObserver* normalUser = UserFactory::createUser("Ahmet", false);
+    IObserver* vipUser = UserFactory::createUser("Lamar", true); // Faz 2: Decorator ile sarmalandi
+
+    // Faz 3: Strategy ile mesaj formati belirlenir
+    IFormatStrategy* stdFormat = new StandardFormat();
+
+    // Faz 2: Facade ile sistemin karmasikligi gizlenir ve yonetilir
+    NotificationFacade system(stdFormat);
+
+    // Faz 3: Observer mantigi ile bildirimler gonderilir
+    std::cout << "\n1. Normal Bildirim:" << std::endl;
+    system.sendNotification(normalUser, "Sistem yarin bakima alinacaktir.");
     
-    // 1. Normal bir kullanici nesnesi yaratilir
-    IObserver* normalUser = new User("Ahmet");
-    
-    // 2. Ayni kullanici nesnesi, ozellik eklenmek uzere sarmalanir
-    IObserver* vipUser = new PriorityDecorator(normalUser);
-    
-    std::cout << "--- Normal Bildirim ---" << std::endl;
-    normalUser->update("Sistem bakima alinacaktir.");
-    
-    std::cout << "\n--- VIP Bildirim ---" << std::endl;
-    vipUser->update("Sunucu coktu, hemen mudahale et!");
-    
-    // Bellek temizligi (Sadece yaratilan isaretciler silinir)
-    delete vipUser;
+    std::cout << "\n2. Oncelikli Bildirim:" << std::endl;
+    system.sendNotification(vipUser, "Sunucu coktu, lutfen mudahale edin!");
+
+    // Bellek temizligi (Pointer'lar siliniyor)
     delete normalUser;
-    
+    delete vipUser; 
+    delete stdFormat;
+
+    std::cout << "\n--- Test Tamamlandi ---" << std::endl;
     return 0;
 }
