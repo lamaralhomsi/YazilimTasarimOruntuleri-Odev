@@ -1,24 +1,12 @@
-Faz 1: Creational Pattern - Factory Method
+# Tasarım Örüntüleri Uygulama Raporu
 
-Nerede Kullanıldı: NotificationFactory sınıfında nesne yaratma sürecinde kullanıldı.
+### Faz 1: Creational Patterns (Yaratımsal Örüntüler)
+* **Factory Method:** Bildirim nesnelerinin (SMS, Email) oluşturulma mantığını istemciden ayırmak ve genişletilebilir bir yapı kurmak için kullanıldı.
 
-Neden Kullanıldı: Başlangıç kodunda NotificationManager tüm bildirim türlerinin detaylarını biliyordu ve bu durum Sıkı Bağımlılık (Tight Coupling) yaratıyordu.
+### Faz 2: Structural Patterns (Yapısal Örüntüler)
+* **Decorator:** Mevcut kullanıcı nesnelerine, sınıfları bozmadan dinamik olarak "Öncelik" özelliği eklemek için kullanıldı.
+* **Facade:** Sistemin karmaşık alt yapısını tek bir basit arayüz üzerinden yönetmek için eklendi.
 
-Ne Kazandık: Nesne yaratma mantığı ile iş mantığı birbirinden ayrıldı. Artık yeni bir bildirim tipi eklemek istediğimizde sadece yeni bir sınıf oluşturup fabrikaya eklememiz yetecek, ana kodu (main) değiştirmek zorunda kalmayacağız.
-
-Faz 2: Behavioral Pattern - Observer Method
-
-Nerede Kullanıldı: NotificationSystem (Yayıncı) ve User (Gözlemci) sınıfları arasında kullanıldı.
-
-Neden Kullanıldı: Bildirimleri alacak kullanıcıların listesini dinamik olarak yönetmek (ekleme/çıkarma) ve tek bir merkezden tüm kullanıcılara mesaj iletebilmek için.
-
-Ne Kazandık: Yayıncı sınıf, abonelerin kim olduğunu bilmek zorunda kalmaz, sadece IObserver arayüzüne bildirim gönderir. Bu da Gevşek Bağlılık (Loose Coupling) sağlar.
-
-Faz 3: Structural Pattern - Decorator Method
-
-Nerede Kullanıldı: ObserverDecorator ve PriorityDecorator sınıflarında kullanıldı.
-
-Neden Kullanıldı: Bildirim sistemindeki nesnelere (kullanıcılara) kalıtım (inheritance) kullanmadan, çalışma zamanında dinamik olarak yeni özellikler (öncelik etiketi) eklemek için.
-
-Ne Kazandık: User sınıfının orijinal yapısını hiç değiştirmeden, istenen kullanıcılara ekstra davranışlar eklenebildi. Bu da Single Responsibility (Tek Sorumluluk) prensibini güçlendirdi.
-
+### Faz 3: Behavioral Patterns (Davranışsal Örüntüler)
+* **Observer:** Sistemdeki bir değişiklikten (yeni bildirim) birden fazla abonenin (kullanıcıların) aynı anda haberdar edilmesi için temel mimari olarak kullanıldı.
+* **Strategy:** Bildirimlerin formatlanma şeklini (Basit metin veya Profesyonel şablon) çalışma zamanında seçebilmek için uygulandı.
