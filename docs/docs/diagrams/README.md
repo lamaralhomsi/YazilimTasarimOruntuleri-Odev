@@ -8,22 +8,29 @@ Sonraki Durum (Çözüm): NotificationFactory sınıfı eklenerek nesne oluştur
 
 ```mermaid
 classDiagram
-    class Notification {
+    class IObserver {
         <<interface>>
-        +send(message: const char*)
+        +update(msg)
     }
-    class EmailNotification {
-        +send(message: const char*)
+    class User {
+        +update(msg)
     }
-    class SMSNotification {
-        +send(message: const char*)
+    class ObserverDecorator {
+        <<abstract>>
+        -IObserver wrapped
+        +update(msg)
     }
-    class NotificationFactory {
-        +createNotification(type: const char*) Notification*
+    class PriorityDecorator {
+        +update(msg)
     }
-    
-    Notification <|-- EmailNotification
-    Notification <|-- SMSNotification
-    NotificationFactory ..> Notification : Creates
+    class NotificationFacade {
+        -IFormatStrategy formatter
+        +sendNotification(user, msg)
+    }
+
+    IObserver <|-- User
+    IObserver <|-- ObserverDecorator
+    ObserverDecorator <|-- PriorityDecorator
+    NotificationFacade ..> IObserver : "Sistemi Yonetir"
 ```
 🚀 Not: Bu diyagram, phase-1 kapsamında uygulanan Factory Method örüntüsünün sınıf yapısını göstermektedir.
