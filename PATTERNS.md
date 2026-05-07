@@ -22,4 +22,4 @@ Sistemde meydana gelen bir olaydan (yeni bildirim gelmesi) birden fazla abonenin
 🔹 STRATEGY
 Bildirimlerin formatlanma algoritmalarını (Standart veya Özel format) kapsülleyerek, çalışma zamanında (runtime) esnek bir değişim sağlamak için sisteme dahil edildi.
 
-🚀 NOT: Bu proje,
+🚀 NOT: Bu proje, KTÜN Yazılım Tasarım Örüntüleri dersi kapsamında, belirtilen tüm akademik kısıtlamalara uyularak geliştirilmiştir.
