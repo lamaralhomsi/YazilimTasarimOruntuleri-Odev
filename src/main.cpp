@@ -1,103 +1,116 @@
 #include <iostream>
 
-// Arayuz: Gozlemci (Observer)
+// --- FAZ 3: BEHAVIORAL (Davranissal) ORUNTULER ---
+
+// 1. STRATEGY PATTERN (Yeni Eklendi)
+class IFormatStrategy {
+public:
+    virtual ~IFormatStrategy() {}
+    virtual void format(const char* msg) = 0;
+};
+
+class StandardFormat : public IFormatStrategy {
+public:
+    void format(const char* msg) override {
+        std::cout << "[Sistem Mesaji]: " << msg << std::endl;
+    }
+};
+
+// 2. OBSERVER PATTERN (Zaten Vardi)
 class IObserver {
 public:
     virtual ~IObserver() {}
     virtual void update(const char* message) = 0;
 };
 
-// Somut Gozlemci: Kullanici (User)
 class User : public IObserver {
 private:
     const char* name;
 public:
     User(const char* userName) : name(userName) {}
     void update(const char* message) override {
-        std::cout << "Kullanici " << name << " yeni bildirim aldi: " << message << std::endl;
+        std::cout << "Kullanici " << name << " bildirimi aldi." << std::endl;
     }
 };
 
-// Yayinci (Subject) - Bildirim Merkezi
-class NotificationSystem {
-private:
-    IObserver** observers; // Pointer to pointer (Dizi yerine)
-    int capacity;
-    int count;
+
+// --- FAZ 2: STRUCTURAL (Yapisal) ORUNTULER ---
+
+// 1. DECORATOR PATTERN (Zaten Vardi)
+class ObserverDecorator : public IObserver {
+protected:
+    IObserver* wrapped;
 public:
-    NotificationSystem(int cap) : capacity(cap), count(0) {
-        observers = new IObserver*[capacity];
-        
-        // Pointer aritmetigi ile baslangic atamasi
-        for (int i = 0; i < capacity; ++i) {
-            *(observers + i) = nullptr;
-        }
-    }
-    
-    ~NotificationSystem() {
-        delete[] observers;
-    }
-
-    void attach(IObserver* observer) {
-        if (count < capacity) {
-            // Indeks yerine pointer aritmetigi kullanildi
-            *(observers + count) = observer;
-            count++;
-        } else {
-            std::cout << "Kapasite dolu, yeni gozlemci eklenemez." << std::endl;
-        }
-    }
-
-    void detach(IObserver* observer) {
-        for (int i = 0; i < count; ++i) {
-            if (*(observers + i) == observer) {
-                // Sola kaydirma islemi (Pointer aritmetigi ile)
-                for (int j = i; j < count - 1; ++j) {
-                    *(observers + j) = *(observers + j + 1);
-                }
-                *(observers + count - 1) = nullptr;
-                count--;
-                break;
-            }
-        }
-    }
-
-    void notifyAll(const char* message) {
-        // Tum abonelere bildirimi ilet (Pointer aritmetigi ile)
-        for (int i = 0; i < count; ++i) {
-            if (*(observers + i) != nullptr) {
-                (*(observers + i))->update(message);
-            }
-        }
+    ObserverDecorator(IObserver* obs) : wrapped(obs) {}
+    virtual void update(const char* msg) override {
+        if(wrapped) wrapped->update(msg);
     }
 };
+
+class PriorityDecorator : public ObserverDecorator {
+public:
+    PriorityDecorator(IObserver* obs) : ObserverDecorator(obs) {}
+    void update(const char* msg) override {
+        std::cout << "[ACIL ONCELIK] ";
+        ObserverDecorator::update(msg);
+    }
+};
+
+// 2. FACADE PATTERN (Yeni Eklendi)
+class NotificationFacade {
+private:
+    IFormatStrategy* formatter;
+public:
+    NotificationFacade(IFormatStrategy* strat) : formatter(strat) {}
+    void sendNotification(IObserver* user, const char* msg) {
+        // Facade karmasikligi gizler: Once formata sokar, sonra gonderir.
+        formatter->format(msg);
+        user->update(msg);
+    }
+};
+
+
+// --- FAZ 1: CREATIONAL (Yaratimsal) ORUNTULER ---
+
+// 1. FACTORY METHOD (Zaten Vardi)
+class UserFactory {
+public:
+    static IObserver* createUser(const char* name, bool isPriority) {
+        IObserver* baseUser = new User(name);
+        if (isPriority) {
+            // Eger oncelikliyse Decorator ile sarmalayip uretir
+            return new PriorityDecorator(baseUser);
+        }
+        return baseUser;
+    }
+};
+
 
 int main() {
-    // Faz 2: Observer Pattern Testi
+    std::cout << "--- Sistem Testi Basliyor ---" << std::endl;
+
+    // Faz 1: Factory ile nesneler uretilir
+    IObserver* normalUser = UserFactory::createUser("Ahmet", false);
+    IObserver* vipUser = UserFactory::createUser("Lamar", true); // Faz 2: Decorator ile sarmalandi
+
+    // Faz 3: Strategy ile mesaj formati belirlenir
+    IFormatStrategy* stdFormat = new StandardFormat();
+
+    // Faz 2: Facade ile sistemin karmasikligi gizlenir ve yonetilir
+    NotificationFacade system(stdFormat);
+
+    // Faz 3: Observer mantigi ile bildirimler gonderilir
+    std::cout << "\n1. Normal Bildirim:" << std::endl;
+    system.sendNotification(normalUser, "Sistem yarin bakima alinacaktir.");
     
-    NotificationSystem* subject = new NotificationSystem(5);
-    
-    User* user1 = new User("Ali");
-    User* user2 = new User("Ayse");
-    User* user3 = new User("Mehmet");
-    
-    subject->attach(user1);
-    subject->attach(user2);
-    
-    std::cout << "--- Ilk Bildirim Gonderiliyor ---" << std::endl;
-    subject->notifyAll("Sistem guncellemesi basliyor!");
-    
-    std::cout << "\n--- Mehmet Sisteme Katiliyor, Ayse Ayriliyor ---" << std::endl;
-    subject->attach(user3);
-    subject->detach(user2);
-    
-    subject->notifyAll("Yeni yari yil basladi!");
-    
-    // Bellek temizligi
-    delete subject;
-    delete user1;
-    delete user2;
-    delete user3;
-    
+    std::cout << "\n2. Oncelikli Bildirim:" << std::endl;
+    system.sendNotification(vipUser, "Sunucu coktu, lutfen mudahale edin!");
+
+    // Bellek temizligi (Pointer'lar siliniyor)
+    delete normalUser;
+    delete vipUser; 
+    delete stdFormat;
+
+    std::cout << "\n--- Test Tamamlandi ---" << std::endl;
     return 0;
 }
