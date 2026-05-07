@@ -23,3 +23,21 @@ src/ -> Kaynak kodlar 📄
 docs/ -> Diyagramlar ve AI logları 📚
 
 PATTERNS.md -> Uygulanan örüntülerin detayları 🔍
+## 📐 Uygulanan Tasarım Örüntüleri
+| Faz | Örüntü Türü | Kullanılan Örüntüler |
+| :--- | :--- | :--- |
+| **Faz 1** | Creational | Factory Method |
+| **Faz 2** | Structural | Decorator & Facade |
+| **Faz 3** | Behavioral | Strategy & Observer |
+
+## 📊 Mimari Diyagram
+Faz güncellemelerini içeren en güncel UML diyagramına [buradan](docs/diagrams/README.md) ulaşabilirsiniz.
+
+## 💻 Projeyi Çalıştırma
+1. Terminali açın.
+2. `g++ -o app src/main.cpp`
+3. `./app`
+
+
+
+
