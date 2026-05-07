@@ -1,8 +1,25 @@
-Faz 1: Creational Pattern - Factory Method
+🛠️ TASARIM ÖRÜNTÜLERİ UYGULAMA RAPORU
+Bu rapor, projenin geliştirme sürecinde kullanılan tasarım örüntülerinin akademik sınıflandırmasını ve kullanım gerekçelerini içermektedir.
 
-Nerede Kullanıldı: NotificationFactory sınıfında nesne yaratma sürecinde kullanıldı.
+🏗️ FAZ 1: CREATIONAL PATTERNS (YARATIMSAL ÖRÜNTÜLER)
 
-Neden Kullanıldı: Başlangıç kodunda NotificationManager tüm bildirim türlerinin detaylarını biliyordu ve bu durum Sıkı Bağımlılık (Tight Coupling) yaratıyordu.
+🔹 FACTORY METHOD
+Bildirim nesnelerinin (SMS, Email) oluşturulma mantığını istemciden ayırmak, nesne üretimini merkezileştirmek ve sistemi yeni bildirim türlerine açık hale getirmek için kullanıldı.
 
-Ne Kazandık: Nesne yaratma mantığı ile iş mantığı birbirinden ayrıldı. Artık yeni bir bildirim tipi eklemek istediğimizde sadece yeni bir sınıf oluşturup fabrikaya eklememiz yetecek, ana kodu (main) değiştirmek zorunda kalmayacağız.
+📐 FAZ 2: STRUCTURAL PATTERNS (YAPISAL ÖRÜNTÜLER)
 
+🔹 DECORATOR
+Mevcut kullanıcı nesnelerine, temel sınıfları modifiye etmeden dinamik olarak "Öncelik" (Priority) özelliği eklemek için tercih edildi.
+
+🔹 FACADE
+Sistemdeki karmaşık nesne etkileşimlerini ve alt yapı operasyonlarını tek bir basit arayüz üzerinden yöneterek kullanım kolaylığı sağlamak için uygulandı.
+
+🔄 FAZ 3: BEHAVIORAL PATTERNS (DAVRANIŞSAL ÖRÜNTÜLER)
+
+🔹 OBSERVER
+Sistemde meydana gelen bir olaydan (yeni bildirim gelmesi) birden fazla abonenin aynı anda ve otomatik olarak haberdar edilmesi amacıyla temel mimari olarak kullanıldı.
+
+🔹 STRATEGY
+Bildirimlerin formatlanma algoritmalarını (Standart veya Özel format) kapsülleyerek, çalışma zamanında (runtime) esnek bir değişim sağlamak için sisteme dahil edildi.
+
+🚀 NOT: Bu proje, KTÜN Yazılım Tasarım Örüntüleri dersi kapsamında, belirtilen tüm akademik kısıtlamalara uyularak geliştirilmiştir.

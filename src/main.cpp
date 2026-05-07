@@ -1,70 +1,116 @@
 #include <iostream>
 
-// Bildirim tipleri
-enum NotificationType { EMAIL, SMS, PUSH };
+// --- FAZ 3: BEHAVIORAL (Davranissal) ORUNTULER ---
 
-// Soyut Urun (Abstract Product) sinifi (Arayuz gorevi gorur)
-class Notification {
+// 1. STRATEGY PATTERN (Yeni Eklendi)
+class IFormatStrategy {
 public:
-    virtual ~Notification() {}
-    // Saf sanal fonksiyon, turetilmis siniflar bunu doldurmak zorunda
-    virtual void send(const char* message, const char* recipient) = 0;
+    virtual ~IFormatStrategy() {}
+    virtual void format(const char* msg) = 0;
 };
 
-// Somut Urunler (Concrete Products)
-class EmailNotification : public Notification {
+class StandardFormat : public IFormatStrategy {
 public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "Email gonderiliyor -> Alici: " << recipient << " | Mesaj: " << message << std::endl;
+    void format(const char* msg) override {
+        std::cout << "[Sistem Mesaji]: " << msg << std::endl;
     }
 };
 
-class SMSNotification : public Notification {
+// 2. OBSERVER PATTERN (Zaten Vardi)
+class IObserver {
 public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "SMS gonderiliyor -> No: " << recipient << " | Mesaj: " << message << std::endl;
+    virtual ~IObserver() {}
+    virtual void update(const char* message) = 0;
+};
+
+class User : public IObserver {
+private:
+    const char* name;
+public:
+    User(const char* userName) : name(userName) {}
+    void update(const char* message) override {
+        std::cout << "Kullanici " << name << " bildirimi aldi." << std::endl;
     }
 };
 
-class PushNotification : public Notification {
+
+// --- FAZ 2: STRUCTURAL (Yapisal) ORUNTULER ---
+
+// 1. DECORATOR PATTERN (Zaten Vardi)
+class ObserverDecorator : public IObserver {
+protected:
+    IObserver* wrapped;
 public:
-    void send(const char* message, const char* recipient) override {
-        std::cout << "Push gonderiliyor -> Cihaz: " << recipient << " | Mesaj: " << message << std::endl;
+    ObserverDecorator(IObserver* obs) : wrapped(obs) {}
+    virtual void update(const char* msg) override {
+        if(wrapped) wrapped->update(msg);
     }
 };
 
-// Fabrika (Factory) Sinifi - Nesne Yaratma Sorumlulugu Sadece Burada!
-class NotificationFactory {
+class PriorityDecorator : public ObserverDecorator {
 public:
-    // Cok bicimlilik (polymorphism) kullanarak pointer donduruyoruz
-    static Notification* createNotification(NotificationType type) {
-        if (type == EMAIL) {
-            return new EmailNotification();
-        } else if (type == SMS) {
-            return new SMSNotification();
-        } else if (type == PUSH) {
-            return new PushNotification();
+    PriorityDecorator(IObserver* obs) : ObserverDecorator(obs) {}
+    void update(const char* msg) override {
+        std::cout << "[ACIL ONCELIK] ";
+        ObserverDecorator::update(msg);
+    }
+};
+
+// 2. FACADE PATTERN (Yeni Eklendi)
+class NotificationFacade {
+private:
+    IFormatStrategy* formatter;
+public:
+    NotificationFacade(IFormatStrategy* strat) : formatter(strat) {}
+    void sendNotification(IObserver* user, const char* msg) {
+        // Facade karmasikligi gizler: Once formata sokar, sonra gonderir.
+        formatter->format(msg);
+        user->update(msg);
+    }
+};
+
+
+// --- FAZ 1: CREATIONAL (Yaratimsal) ORUNTULER ---
+
+// 1. FACTORY METHOD (Zaten Vardi)
+class UserFactory {
+public:
+    static IObserver* createUser(const char* name, bool isPriority) {
+        IObserver* baseUser = new User(name);
+        if (isPriority) {
+            // Eger oncelikliyse Decorator ile sarmalayip uretir
+            return new PriorityDecorator(baseUser);
         }
-        return nullptr;
+        return baseUser;
     }
 };
+
 
 int main() {
-    // ARTIK GOD CLASS YOK! Nesneleri dogrudan uretmiyoruz, Fabrikadan istiyoruz.
+    std::cout << "--- Sistem Testi Basliyor ---" << std::endl;
+
+    // Faz 1: Factory ile nesneler uretilir
+    IObserver* normalUser = UserFactory::createUser("Ahmet", false);
+    IObserver* vipUser = UserFactory::createUser("Lamar", true); // Faz 2: Decorator ile sarmalandi
+
+    // Faz 3: Strategy ile mesaj formati belirlenir
+    IFormatStrategy* stdFormat = new StandardFormat();
+
+    // Faz 2: Facade ile sistemin karmasikligi gizlenir ve yonetilir
+    NotificationFacade system(stdFormat);
+
+    // Faz 3: Observer mantigi ile bildirimler gonderilir
+    std::cout << "\n1. Normal Bildirim:" << std::endl;
+    system.sendNotification(normalUser, "Sistem yarin bakima alinacaktir.");
     
-    // Email nesnesi uretimi
-    Notification* emailNotif = NotificationFactory::createNotification(EMAIL);
-    if (emailNotif != nullptr) {
-        emailNotif->send("Faz 1 - Factory Method tamamlandi!", "lamar@example.com");
-        delete emailNotif; // Pointer kullandigimiz icin bellegi manuel temizliyoruz
-    }
+    std::cout << "\n2. Oncelikli Bildirim:" << std::endl;
+    system.sendNotification(vipUser, "Sunucu coktu, lutfen mudahale edin!");
 
-    // SMS nesnesi uretimi
-    Notification* smsNotif = NotificationFactory::createNotification(SMS);
-    if (smsNotif != nullptr) {
-        smsNotif->send("Kodlar cok daha esnek hale geldi.", "05551234567");
-        delete smsNotif;
-    }
+    // Bellek temizligi (Pointer'lar siliniyor)
+    delete normalUser;
+    delete vipUser; 
+    delete stdFormat;
 
+    std::cout << "\n--- Test Tamamlandi ---" << std::endl;
     return 0;
 }
