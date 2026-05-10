@@ -33,7 +33,7 @@ PATTERNS.md -> Uygulanan örüntülerin detayları 🔍
 ## 📊 Mimari Diyagram
 
 
-Faz güncellemelerini içeren en güncel UML diyagramlarına [buradan](./docs/diagrams/phase3.png) ulaşabilirsiniz.
+Faz güncellemelerini içeren en güncel UML diyagramlarına [buradan](./docs/diagrams/) ulaşabilirsiniz.
 
 ## 💻 Projeyi Çalıştırma
 1. Terminali açın.
