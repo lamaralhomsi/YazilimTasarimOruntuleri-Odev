@@ -31,7 +31,9 @@ PATTERNS.md -> Uygulanan örüntülerin detayları 🔍
 | **Faz 3** | Behavioral | Strategy & Observer |
 
 ## 📊 Mimari Diyagram
-Faz güncellemelerini içeren en güncel UML diyagramına [buradan](docs/diagrams/README.md) ulaşabilirsiniz.
+
+
+Faz güncellemelerini içeren en güncel UML diyagramlarına [buradan](./docs/diagrams/) ulaşabilirsiniz.
 
 ## 💻 Projeyi Çalıştırma
 1. Terminali açın.
